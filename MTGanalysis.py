@@ -79,6 +79,8 @@ analysisdf = pd.DataFrame({'Word Count': wordsinset,
 
 analysisdf['Words per Card'] = analysisdf['Word Count']/analysisdf['Cards in Set']
 
-analysisdf.head()
+print(analysisdf.head())
 
 analysisdf.to_excel('mtgdataanalysis.xlsx')
+print('Excel File Written into working directory')
+
