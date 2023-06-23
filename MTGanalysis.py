@@ -1,126 +1,84 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 8,
-   "id": "bb0a13e0",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#This project uses databases downloaded from the Scryfall.com API \n",
-    "#to conduct basic analysis of Magic: The Gathering cards and products \n",
-    "\n",
-    "import pandas as pd\n",
-    "import json as js\n",
-    "\n",
-    "fname = input('Filename for Cards file(include .json):')\n",
-    "fnamerulings = input('Filename for Rulings file(include .json):')\n",
-    "\n",
-    "cardsdf = pd.DataFrame.from_dict(js.loads(open(fname, encoding='utf8').read()))\n",
-    "rulingsdf = pd.DataFrame.from_dict(js.loads(open(fnamerulings, encoding = 'utf-8').read()))\n",
-    "\n",
-    "def set_columns(x):\n",
-    "    dictkeep = {\n",
-    "        'comment': 'Number of Rulings',\n",
-    "        'name': 'Card Name',\n",
-    "        'oracle_id': 'Oracle_ID',\n",
-    "        'set_type': 'Set Type',\n",
-    "        'oracle_text': 'Card Text',\n",
-    "        'Price': 'Price',\n",
-    "        'released_at': 'Release Date',\n",
-    "        'reprint': 'Reprint',\n",
-    "        'artist': 'Artist',\n",
-    "        'set_name': 'Set Name',\n",
-    "        'flavor_text': 'Flavor Text',\n",
-    "        'Word Count': 'Word Count',\n",
-    "        'Flavor Word Count': 'Flavor Word Count'\n",
-    "    }\n",
-    "    df = x.rename(columns=dictkeep).drop(labels = [name for name in x.columns if name not in dictkeep], axis=1)\n",
-    "    return df\n",
-    "    \n",
-    "def wordcount(x):\n",
-    "    text = x.split()\n",
-    "    return len(text)\n",
-    "\n",
-    "def dfcwordcount(x):\n",
-    "    text1 = x[0]['oracle_text']\n",
-    "    text2 = x[1]['oracle_text']\n",
-    "    return  len((text1 + text2).split())\n",
-    "\n",
-    "def dfcflavorcount(x):\n",
-    "    try:\n",
-    "        text1 = x[0]['flavor_text']\n",
-    "        text2 = x[1]['flavor_text']\n",
-    "        return len((text1 + text2).split())\n",
-    "    except:\n",
-    "        return 0\n",
-    "\n",
-    "def priceget(x):\n",
-    "    nprice = x['usd']\n",
-    "    if nprice is None:\n",
-    "        nprice = x['usd_foil']\n",
-    "    return nprice\n",
-    "\n",
-    "#create and fix columns using the above functions - needed because of the nested/listed dictionaries in the json\n",
-    "cardsdf['Word Count'] = (cardsdf['oracle_text'].map(wordcount, na_action='ignore')).add(cardsdf['card_faces'].map(dfcwordcount, na_action='ignore'), fill_value=0)\n",
-    "cardsdf['Flavor Word Count'] = (cardsdf['flavor_text'].map(wordcount, na_action='ignore')).add(cardsdf['card_faces'].map(dfcflavorcount, na_action='ignore'), fill_value=0)\n",
-    "cardsdf['Price'] = cardsdf['prices'].map(priceget, na_action='ignore')\n",
-    "cardsdf['Price'] = pd.to_numeric(cardsdf['Price'], errors = 'coerce')\n",
-    "\n",
-    "#merge in the 'Rulings' data, then use my set_columns function to create the final dataframe\n",
-    "rcountdf = pd.DataFrame(rulingsdf['comment'].groupby(rulingsdf['oracle_id']).count())\n",
-    "newdf = rcountdf.merge(cardsdf, how='outer', on='oracle_id')\n",
-    "\n",
-    "cardsdf = set_columns(newdf)\n",
-    "\n",
-    "#make a new dataframe for an analysis of word counts, grouped by set, over time (threw in number of artists per set too for fun)\n",
-    "cardsdf = cardsdf.drop_duplicates(subset=['Oracle_ID', 'Set Name'])\n",
-    "settest = cardsdf['Set Name'][(cardsdf['Set Type']=='expansion') | (cardsdf['Set Type']=='core')].dropna()\n",
-    "wordsinset = cardsdf['Word Count'].groupby(settest, sort='ascending').sum()\n",
-    "dateofset = cardsdf['Release Date'].groupby(settest).min()\n",
-    "cardsinset = cardsdf['Card Name'].groupby(settest).count()\n",
-    "artistsinset = cardsdf['Artist'].groupby(settest).nunique()\n",
-    "\n",
-    "analysisdf = pd.DataFrame({'Word Count': wordsinset, \n",
-    "                       'Release Date': dateofset, \n",
-    "                       'Cards in Set': cardsinset, \n",
-    "                       'Artists in Set': artistsinset}, index=wordsinset.index)\n",
-    "\n",
-    "analysisdf['Words per Card'] = analysisdf['Word Count']/analysisdf['Cards in Set']\n",
-    "\n",
-    "analysisdf.head()\n",
-    "\n",
-    "analysisdf.to_excel('mtgdataanalysis.xlsx')"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "64107dd6",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.9.13"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+#This project uses databases downloaded from the Scryfall.com API 
+#to conduct basic analysis of Magic: The Gathering cards and products 
+
+import pandas as pd
+import json as js
+
+fname = input('Filename for Cards file(include .json):')
+fnamerulings = input('Filename for Rulings file(include .json):')
+
+cardsdf = pd.DataFrame.from_dict(js.loads(open(fname, encoding='utf8').read()))
+rulingsdf = pd.DataFrame.from_dict(js.loads(open(fnamerulings, encoding = 'utf-8').read()))
+
+def set_columns(x):
+    dictkeep = {
+        'comment': 'Number of Rulings',
+        'name': 'Card Name',
+        'oracle_id': 'Oracle_ID',
+        'set_type': 'Set Type',
+        'oracle_text': 'Card Text',
+        'Price': 'Price',
+        'released_at': 'Release Date',
+        'reprint': 'Reprint',
+        'artist': 'Artist',
+        'set_name': 'Set Name',
+        'flavor_text': 'Flavor Text',
+        'Word Count': 'Word Count',
+        'Flavor Word Count': 'Flavor Word Count'
+    }
+    df = x.rename(columns=dictkeep).drop(labels = [name for name in x.columns if name not in dictkeep], axis=1)
+    return df
+    
+def wordcount(x):
+    text = x.split()
+    return len(text)
+
+def dfcwordcount(x):
+    text1 = x[0]['oracle_text']
+    text2 = x[1]['oracle_text']
+    return  len((text1 + text2).split())
+
+def dfcflavorcount(x):
+    try:
+        text1 = x[0]['flavor_text']
+        text2 = x[1]['flavor_text']
+        return len((text1 + text2).split())
+    except:
+        return 0
+
+def priceget(x):
+    nprice = x['usd']
+    if nprice is None:
+        nprice = x['usd_foil']
+    return nprice
+
+#create and fix columns using the above functions - needed because of the nested/listed dictionaries in the json
+cardsdf['Word Count'] = (cardsdf['oracle_text'].map(wordcount, na_action='ignore')).add(cardsdf['card_faces'].map(dfcwordcount, na_action='ignore'), fill_value=0)
+cardsdf['Flavor Word Count'] = (cardsdf['flavor_text'].map(wordcount, na_action='ignore')).add(cardsdf['card_faces'].map(dfcflavorcount, na_action='ignore'), fill_value=0)
+cardsdf['Price'] = cardsdf['prices'].map(priceget, na_action='ignore')
+cardsdf['Price'] = pd.to_numeric(cardsdf['Price'], errors = 'coerce')
+
+#merge in the 'Rulings' data, then use my set_columns function to create the final dataframe
+rcountdf = pd.DataFrame(rulingsdf['comment'].groupby(rulingsdf['oracle_id']).count())
+newdf = rcountdf.merge(cardsdf, how='outer', on='oracle_id')
+
+cardsdf = set_columns(newdf)
+
+#make a new dataframe for an analysis of word counts, grouped by set, over time (threw in number of artists per set too for fun)
+cardsdf = cardsdf.drop_duplicates(subset=['Oracle_ID', 'Set Name'])
+settest = cardsdf['Set Name'][(cardsdf['Set Type']=='expansion') | (cardsdf['Set Type']=='core')].dropna()
+wordsinset = cardsdf['Word Count'].groupby(settest, sort='ascending').sum()
+dateofset = cardsdf['Release Date'].groupby(settest).min()
+cardsinset = cardsdf['Card Name'].groupby(settest).count()
+artistsinset = cardsdf['Artist'].groupby(settest).nunique()
+
+analysisdf = pd.DataFrame({'Word Count': wordsinset, 
+                       'Release Date': dateofset, 
+                       'Cards in Set': cardsinset, 
+                       'Artists in Set': artistsinset}, index=wordsinset.index)
+
+analysisdf['Words per Card'] = analysisdf['Word Count']/analysisdf['Cards in Set']
+
+analysisdf.head()
+
+analysisdf.to_excel('mtgdataanalysis.xlsx')
