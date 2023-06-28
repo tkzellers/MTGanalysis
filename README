@@ -1,7 +1,7 @@
 INTRO
 This repository contains two separate Python programs written to achieve the exact same result: 
 produce/export data that can be used to do a number of statistical analyses on Magic: The Gathering products. 
-Intended as a portfolio project, the reason for writing two separate Python programs is to practice my skills in the Pandas library, as well as SQL and sqlite. 
+Intended as a portfolio project, the reason for writing two separate Python programs is to practice my skills in both Pandas and SQL and SQlite. 
 
 The question that is guiding this unfinished project is, broadly speaking, "how has the complexity of the game design of Magic:The Gathering changed over time?"
 For now, I have narrowed the question of complexity down to two variables: 
