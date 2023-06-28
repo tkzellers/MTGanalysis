@@ -16,11 +16,13 @@ https://docs.google.com/spreadsheets/d/12Af3VBLuKWugjFI3B9LombTIuEphPSS2UVlNFwdw
 
 USAGE
 This program is not intended to be used interactively, but is mainly here for feedback and to showcase my current progress in learning Python, SQL, and Data Science.
+Running the MTGanalysis_pandas.py script will produce an exported xlsx file of the relevant data organized to facilitate anlaysis of the above question. 
+Running the MTGanalysis_sql.py script will produce a SQlite database file.  The user can then use the mtganalysis_sql.sql query to create an output that can be exported 
+to a CSV file, for the same purpose. 
 
 DATA / REQUIREMENTS
 SQLite 3 is needed to run the mtganalysis_sql.py file, as written. 
-Both programs require the user to download bulk data files from the Scryfall API site. They are set to default to files included in this repository, however a user 
-can download, rename, and enter their own files if desired.  The bulk data files provided by Scryfall are updated every 24 hours. 
+Both programs require the user to download bulk data files from the Scryfall API site.  The bulk data files provided by Scryfall are updated every 24 hours. 
 You can download the following two data files from https://scryfall.com/docs/api:
 
 Default Cards:
