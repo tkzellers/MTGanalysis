@@ -1,8 +1,34 @@
-You must download the following two data files from scryfall.com:
+INTRO
+This repository contains two separate Python programs written to achieve the exact same result: 
+produce/export data that can be used to do a number of statistical analyses on Magic: The Gathering products. 
+Intended as a portfolio project, the reason for writing two separate Python programs is to practice my skills in the Pandas library, as well as SQL and sqlite. 
 
+The question that guided this project from the beginning was, broadly speaking, "how has the complexity of the game design of Magic:The Gathering changed over time?"
+I narrowed the question of complexity down to two variables: 
+1) Words printed on indivudal cards
+2) Rulings on individual cards 
+
+The Python scripts were written with those questions in mind, and -more specifically- my analysis seeks to plot those variables over time, 
+organized within each Magic:The Gathering set of cards. 
+
+Future analysis will apply more sophisticated statistical techniques to the data, but for now some preliminary charts can be viewed here:
+https://docs.google.com/spreadsheets/d/12Af3VBLuKWugjFI3B9LombTIuEphPSS2UVlNFwdwp-U/edit?usp=sharing
+
+USAGE
+This program is not intended to be used interactively, but is mainly here for feedback and to showcase my current progress in learning Python, SQL, and Data Science.
+
+DATA / REQUIREMENTS
+SQLite 3 is needed to run the mtganalysis_sql.py file, as written. 
+Both programs require the user to download bulk data files from the Scryfall API site. They are set to default to files included in this repository, however a user 
+can download, rename, and enter their own files if desired.  The bulk data files provided by Scryfall are updated every 24 hours. 
+You can download the following two data files from https://scryfall.com/docs/api:
+
+Default Cards:
 https://data.scryfall.io/default-cards/default-cards-20230623090636.json
+
+Rulings:
 https://data.scryfall.io/rulings/rulings-20230623090029.json
 
-Save them as whatever you want, but the program will prompt you for those file names
+Save them as whatever you want, the program will prompt you for those file names.
 
 
